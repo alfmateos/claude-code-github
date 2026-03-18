@@ -3,6 +3,7 @@ import { render, screen, waitFor, act, cleanup } from "@testing-library/react";
 import { ChatProvider, useChat } from "../chat-context";
 import { useFileSystem } from "../file-system-context";
 import { useChat as useAIChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import * as anonTracker from "@/lib/anon-work-tracker";
 
 // Mock dependencies
@@ -97,12 +98,8 @@ describe("ChatContext", () => {
     );
 
     expect(useAIChat).toHaveBeenCalledWith({
-      api: "/api/chat",
-      initialMessages,
-      body: {
-        files: mockFileSystem.serialize(),
-        projectId: "test-project",
-      },
+      messages: initialMessages,
+      transport: expect.any(DefaultChatTransport),
       onToolCall: expect.any(Function),
     });
 
@@ -191,9 +188,9 @@ describe("ChatContext", () => {
       </ChatProvider>
     );
 
-    const toolCall = { toolName: "test", args: {} };
+    const toolCall = { toolName: "test", input: {} };
     onToolCallHandler({ toolCall });
 
-    expect(mockHandleToolCall).toHaveBeenCalledWith(toolCall);
+    expect(mockHandleToolCall).toHaveBeenCalledWith({ toolName: "test", args: {} });
   });
 });
